@@ -91,16 +91,12 @@ def load(plugin_places, config):
         plugin_files = os.listdir(path)
         plugin_files = filter(filter_python_files, plugin_files)
 
-        print "# loading: %s" % path
-        print "#   found: %s" % plugin_files
-
         for plugin_file in plugin_files:
             module_name = plugin_file.rstrip(".py")
             importlib.import_module(module_name)
 
     def load():
         for place in plugin_places:
-            print "# looking into: %s" % place
             if exists(place):
                 sys.path.insert(0, place)
                 load_plugins_from(place)
