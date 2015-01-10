@@ -20,10 +20,6 @@ class PathCalculator(object):  # stupid name....
         return abspath(pjoin(absolute_here, *path))
 
 
-# TODO: add command that scans all the projects directories and checks
-# for last X days - "what I've been doing" report on git logs basis.
-
-
 class Penv(bash.BashMixin, conf.ConfigurationMixin):
     def get_plugins(self, root_new):
         config = self.get_config(root_new)
