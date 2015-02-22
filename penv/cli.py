@@ -3,10 +3,11 @@ import os
 import click
 
 from .base import Penv
+from . import VERSION
 
 
 abspath = os.path.abspath
-install_script_bash = """
+startup_script_bash = """
 function cd () {
     LOCK_FILE=/tmp/.penv-lock
 
@@ -42,13 +43,18 @@ function penv-ify () {
 
 
 @click.group(invoke_without_command=True)
-@click.option('--install-script', default='bash',
+@click.option('--version', '-v', is_flag=True, default=False,
+              help=('Prints version'))
+@click.option('--startup-script', is_flag=True, default=False,
               help=('Just prints the command to be evaluated by given shell '
                     '(so far only bash supported)'))
 @click.pass_context
-def cli(ctx, install_script):
-    if ctx.invoked_subcommand is None and install_script:
-        return click.echo(install_script_bash)
+def cli(ctx, version, startup_script):
+    if ctx.invoked_subcommand is None and version:
+        return click.echo(VERSION)
+
+    if ctx.invoked_subcommand is None and startup_script:
+        return click.echo(startup_script_bash)
 
     if ctx.invoked_subcommand is None:
         return click.echo(ctx.command.get_help(ctx))
@@ -56,7 +62,7 @@ def cli(ctx, install_script):
     # Maybe I'll make "place" customizable at some point
     ctx.obj = {
         'place': abspath('.'),
-        'install_script': install_script,
+        'startup_script': startup_script,
     }
 
 
