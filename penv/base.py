@@ -4,6 +4,7 @@ import os
 from . import bash
 from . import conf
 from . import plugins
+from . import shell
 
 
 abspath = os.path.abspath
@@ -24,6 +25,26 @@ class Penv(bash.BashMixin, conf.ConfigurationMixin):
     def get_plugins(self, root_new):
         config = self.get_config(root_new)
         return plugins.load(config.PLUGIN_PLACES, config)
+
+    # init
+    #
+    # has nothing todo with the rest, but I don't know yet where to
+    # put it. Supposed to be invoked on "$> penv init" command.
+    def init_script(self, root_new):
+        result = []
+        for plugin in self.get_plugins(root_new):
+            scripts = plugin.init(root_new)
+            result.extend(scripts or [])
+        return "\n".join(result)
+
+    def init(self, place):
+        # by default create only ".penv" directory and append:
+        # "eval "$(penv scan)""
+        root_new = PathCalculator(place)
+        config = self.get_config(root_new)
+        shell.mkdir_p(root_new(config.TRIGGER))
+        return self.init_script(root_new)
+    # end / init
 
     def deactivate_bash_script(self, root_new, root_old):
         result = []

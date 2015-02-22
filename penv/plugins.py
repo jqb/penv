@@ -24,6 +24,14 @@ class Plugin(bash.BashMixin):
         msg = str(msg)
         sys.stdout.write('%s\n' % self.bash.echo(msg % args))
 
+    # Invoked on: "penv init"
+    #
+    # Basically: what todo *after* ".penv" gets activated in *this*
+    # directory I'm currently in. Therefore ".penv" is guaranteed to
+    # exist when this method is invoked.
+    def init(self, root_new):
+        return []
+
     def on_activate(self, root_new, root_old):
         return []
 
