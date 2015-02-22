@@ -18,24 +18,18 @@ Installation::
    $> pip install penv
 
    # And put following to your .bashrc
-   # eval "`penv --override-cd-bash`"
+   # eval "`penv --startup-script`"
 
 
 Usage::
 
    # overriden "cd" function generation
-   $> penv --override-cd-bash
+   $> penv --startup-script
 
-   # Generated output is following:
+   # You can simply check generated output by invoking the command.
+   # To put it into effect please put the following into your .bashrc:
    #
-   # function cd () {
-   #     builtin cd "$@" && eval "$(penv scan)"
-   # }
-   #
-   # so that's why, in order to activate it, you should put
-   # following to your .bashrc:
-   #
-   # eval "`penv --override-cd-bash`"
+   # eval "`penv --startup-script`"
 
 
 So... what it does?
@@ -85,10 +79,6 @@ Ok, so why it's cool?
 
 #) Pluginable nature allows you to customize environment for each
    project and reuse plugins.
-
-#) When you'll have to deal with 100 projects each having Makefile
-   you have to maintain you'll probably understand why two above
-   reasons are important.
 
 
 TODO
