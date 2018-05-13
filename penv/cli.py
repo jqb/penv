@@ -8,16 +8,17 @@ from . import VERSION
 
 abspath = os.path.abspath
 startup_script_bash = """
-function cd () {
-    LOCK_FILE=/tmp/.penv-lock
+export PENV_SESSION_ID="$(python -c 'import uuid; print(uuid.uuid4())')"
+export PENV_LOCK_FILE="/tmp/.penv-lock-$PENV_SESSION_ID"
 
-    if [ -f $LOCK_FILE ]
+function cd () {
+    if [ -f $PENV_LOCK_FILE ]
     then
         builtin cd "$@"
     else
-        touch $LOCK_FILE
+        touch $PENV_LOCK_FILE
         builtin cd "$@" && eval "$(penv scan)"
-        rm $LOCK_FILE
+        rm $PENV_LOCK_FILE
     fi
 }
 
