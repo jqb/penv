@@ -110,9 +110,9 @@ class Penv(bash.BashMixin, conf.ConfigurationMixin):
         parent_stream.writeln(stream.getvalue())
 
         if place == "/":
-            return parent_stream.getvalue()
+            return venv_exists, place, parent_stream.getvalue()
 
         if not venv_exists and not skip_searching:
             return self.lookup(abspath(pjoin(place, "..")), parent_stream)
 
-        return parent_stream.getvalue()
+        return venv_exists, place, parent_stream.getvalue()
