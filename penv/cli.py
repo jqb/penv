@@ -2,6 +2,8 @@
 import os
 import click
 
+from datetime import datetime
+
 from .base import Penv
 from . import VERSION
 
@@ -34,13 +36,18 @@ function penv-ify () {
             ln -s ../$VIRTUAL_ENV_DIRECTORY_PATH $VIRTUAL_ENV_DIRECTORY_NAME && \
             builtin cd ..
     else
-        echo "venv" > .penv/default
-        virtualenv .penv/venv --prompt="(`basename \`pwd\``)"
+        penv venv-new
     fi
 
     cd .
 }
 """
+
+
+def execute(args, script=None, env=None):
+    # TODO: is cleanup needed before calling exec? (open files, ...)
+    command = script or args[0]
+    os.execvpe(command, args, env or os.environ)
 
 
 @click.group(invoke_without_command=True)
@@ -71,5 +78,24 @@ def cli(ctx, version, startup_script):
 @cli.command('scan')
 @click.pass_context
 def cli_scan(ctx, env=Penv()):
-    place = ctx.obj['place']
-    return click.echo(env.lookup(place))
+    penv_exists, place, stream = env.lookup(ctx.obj['place'])
+    return click.echo(stream)
+
+
+# $> penv venv-new
+@cli.command('venv-new')
+@click.pass_context
+def cli_venv_new(ctx, env=Penv()):
+    penv_exists, place, stream = env.lookup(ctx.obj['place'])
+    if not penv_exists:
+        msg = 'Could not find .penv directory (starting from: %s)' % place
+        return click.echo(msg)
+
+    datestamp = datetime.now().strftime('%Y_%m_%d__%H%M%S')
+    venv_name = 'venvs/venv_%s' % (datestamp, )
+    default_pointer = os.path.join(place, '.penv', 'default')
+    with open(default_pointer, 'w') as fd:
+        fd.write(venv_name)
+    venv_place = os.path.join(place, '.penv', venv_name)
+    option = '--prompt="\(%s__%s\)"' % (datestamp, os.path.basename(place))
+    return execute(['virtualenv', venv_place, option])
