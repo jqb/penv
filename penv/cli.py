@@ -106,6 +106,7 @@ def cli_venv_new(ctx, python, env=Penv()):
         datestamp,
         os.path.basename(place),
     )
+    command = ['virtualenv', venv_place, option]
     if python_executable:
-        option = '%s --python=%s' % (option, python_executable)
-    return execute(['virtualenv', venv_place, option])
+        command.append('--python=%s' % (python_executable))
+    return execute(command)
