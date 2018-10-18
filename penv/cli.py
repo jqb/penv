@@ -84,18 +84,28 @@ def cli_scan(ctx, env=Penv()):
 
 # $> penv venv-new
 @cli.command('venv-new')
+@click.option('--python', '-p', default=None,
+              help=('Python executable to be used'))
 @click.pass_context
-def cli_venv_new(ctx, env=Penv()):
+def cli_venv_new(ctx, python, env=Penv()):
     penv_exists, place, stream = env.lookup(ctx.obj['place'])
     if not penv_exists:
         msg = 'Could not find .penv directory (starting from: %s)' % place
         return click.echo(msg)
+
+    python_executable = python or os.environ.get('PYTHON_EXECUTABLE')
 
     datestamp = datetime.now().strftime('%Y_%m_%d__%H%M%S')
     venv_name = 'venvs/venv_%s' % (datestamp, )
     default_pointer = os.path.join(place, '.penv', 'default')
     with open(default_pointer, 'w') as fd:
         fd.write(venv_name)
+
     venv_place = os.path.join(place, '.penv', venv_name)
-    option = '--prompt="\(%s__%s\)"' % (datestamp, os.path.basename(place))
+    option = '--prompt="\(%s__%s\)"' % (
+        datestamp,
+        os.path.basename(place),
+    )
+    if python_executable:
+        option = '%s --python=%s' % (option, python_executable)
     return execute(['virtualenv', venv_place, option])
