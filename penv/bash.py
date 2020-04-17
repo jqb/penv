@@ -2,13 +2,13 @@
 """
 Small helpers that makes easy to generate bash.
 """
+import io
 import pipes
-from cStringIO import StringIO
 
 
 class BashStream(object):
     def __init__(self):
-        self.out = StringIO()
+        self.out = io.StringIO()
 
     def getvalue(self):
         return self.out.getvalue()
