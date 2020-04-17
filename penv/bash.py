@@ -32,10 +32,10 @@ class Bash(object):
         return 'source %s' % file_path
 
     def unset(self, name):
-        return 'unset %s' % name
+        return 'unset %s >/dev/null 2>&1' % name
 
     def unset_f(self, name):
-        return 'unset -f %s' % name
+        return 'unset -f %s >/dev/null 2>&1' % name
 
     def function(self, name, definition):
         return 'function %s () { %s; }' % (name, definition)
