@@ -1,4 +1,4 @@
 # -*- coding: utf-8 -*-
-VERSION = '0.9'
+VERSION = '1.0'
 
 from .plugins import Plugin, registry  # NOQA
