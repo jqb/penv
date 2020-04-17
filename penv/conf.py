@@ -16,12 +16,23 @@ class ConfigurationReader(object):
     DEFAULT_TRIGGER = '.penv'
     DEFAULT_SKIP_FILE = '.skip'
 
+    def get_contrib_modules(self):
+        try:
+            import penv_contrib
+            return [
+                os.path.abspath(os.path.dirname(penv_contrib.__file__))
+            ]
+        except Exception:
+            return []
+
     def read_defaults(self, config):
+        plugin_places = self.get_contrib_modules()
+        plugin_places.extend([
+            pjoin(expanduser("~"), '.penv', '.plugins'),
+        ])
         config.update({
             'TRIGGER': os.environ.get('PENV_TRIGGER', self.DEFAULT_TRIGGER),
-            'PLUGIN_PLACES': [
-                pjoin(expanduser("~"), '.penv', '.plugins'),
-            ],
+            'PLUGIN_PLACES': plugin_places,
             'SKIP_FILE': os.environ.get('PENV_SKIP_FILE', self.DEFAULT_SKIP_FILE),
         })
         return config
