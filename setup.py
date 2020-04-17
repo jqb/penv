@@ -37,3 +37,6 @@ setup(
 # Usage of setup.py:
 # $> python setup.py register                         # registering package on PYPI
 # $> python setup.py build sdist bdist_wheel upload   # build, make source dist and upload to PYPI
+#
+# python setup.py build sdist bdist_wheel
+# twine upload -r pypi dist/*
