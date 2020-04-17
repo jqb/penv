@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import click
+import subprocess
 
 from datetime import datetime
 
@@ -50,6 +51,19 @@ def execute(args, script=None, env=None):
     os.execvpe(command, args, env or os.environ)
 
 
+def command_is_available(command, shell=False):
+    try:
+        subprocess.check_output(
+            command,
+            stderr=subprocess.STDOUT,
+            shell=shell)
+        return True
+    except subprocess.CalledProcessError:
+        return False
+    except Exception:
+        return False
+
+
 @click.group(invoke_without_command=True)
 @click.option('--version', '-v', is_flag=True, default=False,
               help=('Prints version'))
@@ -94,6 +108,7 @@ def cli_venv_new(ctx, python, env=Penv()):
         return click.echo(msg)
 
     python_executable = python or os.environ.get('PYTHON_EXECUTABLE')
+    python_command = python_executable or 'python'
 
     datestamp = datetime.now().strftime('%Y_%m_%d__%H%M%S')
     venv_name = 'venvs/venv_%s' % (datestamp, )
@@ -106,7 +121,22 @@ def cli_venv_new(ctx, python, env=Penv()):
         datestamp,
         os.path.basename(place),
     )
-    command = ['virtualenv', venv_place, option]
-    if python_executable:
-        command.append('--python=%s' % (python_executable))
+
+    if command_is_available([python_command, '-m', 'venv', '--help']):
+        command = [
+            python_command, '-m', 'venv', option
+        ]
+    elif command_is_available(['virtualenv', '--help']):
+        command = [
+            'virtualenv', venv_place, option
+        ] + ([
+            '--python=%s' % (python_executable, )
+        ] if python_executable else [])
+    else:
+        raise click.Abort(
+            'Cannot find neither of: "%s -m venv" nor "virtualenv"' % (
+                python_command,
+            )
+        )
+
     return execute(command)
