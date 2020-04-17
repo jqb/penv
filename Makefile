@@ -17,4 +17,4 @@ cleanup:
 
 publish: cleanup
 	python setup.py build sdist bdist_wheel
-	twine upload -r fury dist/*
+	twine upload -r pypi dist/*
