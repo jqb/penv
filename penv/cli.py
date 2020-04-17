@@ -64,6 +64,29 @@ def command_is_available(command, shell=False):
         return False
 
 
+def find_suitable_venv(python_executable, venv_place, option):
+    if command_is_available(['virtualenv', '--help']):
+        return [
+            'virtualenv', venv_place, option
+        ] + ([
+            '--python=%s' % (python_executable, )
+        ] if python_executable else [])
+
+    if command_is_available([python_executable, '-m', 'venv', '--help']):
+        return [python_executable, '-m', 'venv', option, venv_place]
+
+    # Last resort(s):
+    if command_is_available(['python', '-m', 'venv', '--help']):
+        return [
+            'python', '-m', 'venv', option, venv_place
+        ]
+
+    if command_is_available(['python3', '-m', 'venv', '--help']):
+        return [
+            'python3', '-m', 'venv', option, venv_place
+        ]
+
+
 @click.group(invoke_without_command=True)
 @click.option('--version', '-v', is_flag=True, default=False,
               help=('Prints version'))
@@ -108,7 +131,6 @@ def cli_venv_new(ctx, python, env=Penv()):
         return click.echo(msg)
 
     python_executable = python or os.environ.get('PYTHON_EXECUTABLE')
-    python_command = python_executable or 'python'
 
     datestamp = datetime.now().strftime('%Y_%m_%d__%H%M%S')
     venv_name = 'venvs/venv_%s' % (datestamp, )
@@ -122,21 +144,9 @@ def cli_venv_new(ctx, python, env=Penv()):
         os.path.basename(place),
     )
 
-    if command_is_available([python_command, '-m', 'venv', '--help']):
-        command = [
-            python_command, '-m', 'venv', option
-        ]
-    elif command_is_available(['virtualenv', '--help']):
-        command = [
-            'virtualenv', venv_place, option
-        ] + ([
-            '--python=%s' % (python_executable, )
-        ] if python_executable else [])
-    else:
-        raise click.Abort(
-            'Cannot find neither of: "%s -m venv" nor "virtualenv"' % (
-                python_command,
-            )
-        )
+    command = find_suitable_venv(python_executable, venv_place, option)
+    if not command:
+        click.echo('[ERROR] Could not find any tool to create virtual environment')
+        raise click.Abort()
 
     return execute(command)
